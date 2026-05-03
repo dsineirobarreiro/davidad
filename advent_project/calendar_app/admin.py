@@ -16,7 +16,10 @@ class OrderAnswerItemInline(admin.TabularInline):
 class OrderAnswerAdmin(admin.ModelAdmin):
     inlines = [OrderAnswerItemInline]
 
+class SingleChoiceAnswerAdmin(admin.ModelAdmin):
+    list_display = ('answer', 'choice')
+
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(Answer)
-admin.site.register(SingleChoiceAnswer)
+admin.site.register(SingleChoiceAnswer, SingleChoiceAnswerAdmin)
 admin.site.register(OrderAnswer, OrderAnswerAdmin)

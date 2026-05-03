@@ -1,13 +1,34 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
+from .forms import SignUpForm
 from .models import Question, Answer
 from .utils import get_next_question_for_user
 from .services.answer_service import AnswerService
 
+def register(request):
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password'])
+            user.save()
+
+            # login automático tras registro
+            login(request, user)
+
+            return redirect('home')
+    else:
+        form = SignUpForm()
+
+    return render(request, 'registration/register.html', {
+        'form': form
+    })
 
 @login_required
 def home(request):
