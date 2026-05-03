@@ -1,0 +1,75 @@
+/* =========================
+    TILE FLIP CONTAINER
+========================== */
+.flip-card {
+    width: 100%;
+    height: 110px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+}
+
+.flip-card.open {
+    transform: rotateY(180deg);
+}
+
+/* =========================
+    FACES
+========================== */
+.flip-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 22px;
+}
+
+.front {
+    background: #0d6efd;
+    color: white;
+}
+
+.back {
+    background: #e7d20f;
+    color: white;
+    transform: rotateY(180deg);
+    flex-direction: column;
+}
+
+.gift {
+    font-size: 30px;
+    animation: bounce 0.6s ease infinite alternate;
+}
+
+@keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-6px); }
+}
+
+/* locked styles */
+.locked .front {
+    background: #e9ecef;
+    color: #adb5bd;
+}
+
+.completed .front {
+    background: #198754;
+}
+
+.blocked .front {
+    background: #dee2e6;
+    color: #6c757d;
+}
+
+.cursor-grab {
+    cursor: grab;
+}
+
+.cursor-grab:active {
+    cursor: grabbing;
+}

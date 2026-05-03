@@ -1,0 +1,110 @@
+{% extends 'master.html' %}
+{% load static %}
+
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'calendar_app/css/stylesheet.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+        <style>
+            .question-card {
+                width: 100%;
+                max-width: 520px;
+                border-radius: 16px;
+            }
+
+            .option-hover:hover {
+                background-color: #f8f9fa;
+                cursor: pointer;
+            }
+
+            .drag-handle {
+                cursor: grab;
+            }
+
+            .drag-handle:active {
+                cursor: grabbing;
+            }
+        </style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-center h-100 p-5">
+
+    <div class="question-card card shadow-lg p-4">
+    <!-- Header -->
+    <div class="text-center mb-4">
+        <span class="badge bg-primary mb-2">Día {{ question.day }}</span>
+        <h4 class="fw-bold fs-5">{{ question.text }}</h4>
+    </div>
+
+    {% if error %}
+        <div class="alert alert-danger">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <!-- FORM -->
+    <form method="post" id="{% if question.question_type == 'ORDER' %}orderForm{% endif %}">
+        {% csrf_token %}
+
+        <!-- ===================== -->
+        <!-- MULTI -->
+        <!-- ===================== -->
+        {% if question.question_type == "MULTI" %}
+
+            <div class="list-group mb-3">
+
+                {% for choice in question.choices.all %}
+                <label class="list-group-item option-hover d-flex align-items-center">
+                    
+                    <input class="form-check-input me-3"
+                        type="radio"
+                        name="choice"
+                        value="{{ choice.id }}"
+                        required>
+
+                    {{ choice.text }}
+
+                </label>
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+        <!-- ===================== -->
+        <!-- ORDER -->
+        <!-- ===================== -->
+        {% if question.question_type == "ORDER" %}
+
+            <ul id="sortable-list" class="list-group mb-3">
+
+                {% for choice in question.choices.all %}
+                <li class="list-group-item d-flex justify-content-between align-items-center drag-handle"
+                    data-id="{{ choice.id }}">
+
+                    <span>{{ choice.text }}</span>
+
+                </li>
+                {% endfor %}
+
+            </ul>
+
+            <input type="hidden" name="order" id="orderInput">
+
+        {% endif %}
+
+        <!-- BUTTON -->
+        <button class="btn btn-primary w-100 py-2 fw-bold">
+            Enviar respuesta
+        </button>
+
+    </form>
+
+    </div>
+
+    <script src="{% static 'calendar_app/js/order.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+</div>
+{% endblock %}

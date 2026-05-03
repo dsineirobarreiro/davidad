@@ -1,0 +1,100 @@
+{% extends 'master.html' %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'calendar_app/css/stylesheet.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<form method="post" action="/accounts/logout/" class="position-absolute top-0 end-0 m-3">
+    {% csrf_token %}
+    <button class="btn btn-outline-danger btn-sm">
+        Cerrar sesión
+    </button>
+</form>
+
+<div class="container py-5">
+
+    <div class="text-center mb-4">
+        <h1>🎄 Calendario de Adviento</h1>
+        <p>Haz click para abrir tu casilla</p>
+    </div>
+
+    <div class="row g-3 justify-content-center calendar-grid">
+
+        {% for day in calendar_days %}
+
+        <div class="col-4 col-sm-3 col-md-2">
+
+            {% if day.status == "available" %}
+            <div class="flip-card open-day" data-url="{% url 'answer_question' day.question_id %}">
+                <div class="flip-face front">
+                    {{ day.day }}
+                </div>
+                <div class="flip-face back">
+                    <div class="gift">🎁</div>
+                    <small>Abriendo...</small>
+                </div>
+            </div>
+
+            {% elif day.status == "completed" %}
+            <div class="flip-card completed">
+                <div class="flip-face front">
+                    {{ day.day }} ✓
+                </div>
+                <div class="flip-face back">
+                    ✔
+                </div>
+            </div>
+
+            {% elif day.status == "locked" %}
+            <div class="flip-card locked">
+                <div class="flip-face front">
+                    🔒
+                </div>
+                <div class="flip-face back">
+                    🔒
+                </div>
+            </div>
+
+            {% else %}
+            <div class="flip-card blocked">
+                <div class="flip-face front">
+                    {{ day.day }}
+                </div>
+                <div class="flip-face back">
+                    ❌
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+<script>
+document.querySelectorAll('.open-day').forEach(card => {
+    card.addEventListener('click', function () {
+
+        const url = this.dataset.url;
+
+        // activar flip
+        this.classList.add('open');
+
+        // desactivar interacción extra
+        this.style.pointerEvents = "none";
+
+        // redirigir tras animación
+        setTimeout(() => {
+            window.location.href = url;
+        }, 900);
+    });
+});
+</script>
+
+{% endblock %}
