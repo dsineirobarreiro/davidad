@@ -3,13 +3,16 @@
 
 {% block head %}
     <link rel="stylesheet" type="text/css" href="{% static 'calendar_app/css/stylesheet.css' %}">
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
         <style>
             .question-card {
                 width: 100%;
                 max-width: 520px;
+                height: 80vh;
+                display: flex;
+                flex-direction: column;
                 border-radius: 16px;
+                overflow: hidden; /* 👈 IMPORTANTE */
             }
 
             .option-hover:hover {
@@ -28,83 +31,90 @@
 {% endblock %}
 
 {% block content %}
-<div class="d-flex align-items-center justify-content-center h-100 p-5">
+<div class="d-flex align-items-center justify-content-center min-vh-100 px-3">
 
     <div class="question-card card shadow-lg p-4">
-    <!-- Header -->
-    <div class="text-center mb-4">
-        <span class="badge bg-primary mb-2">Día {{ question.day }}</span>
-        <h4 class="fw-bold fs-5">{{ question.text }}</h4>
-    </div>
-
-    {% if error %}
-        <div class="alert alert-danger">
-            {{ error }}
-        </div>
-    {% endif %}
 
     <!-- FORM -->
-    <form method="post" id="{% if question.question_type == 'ORDER' %}orderForm{% endif %}">
+    <form method="post"
+        id="{% if question.question_type == 'ORDER' %}orderForm{% endif %}"
+        class="d-flex flex-column h-100">
+
         {% csrf_token %}
 
-        <!-- ===================== -->
-        <!-- MULTI -->
-        <!-- ===================== -->
-        {% if question.question_type == "MULTI" %}
+        {% if error %}
+            <div class="alert alert-danger">
+                {{ error }}
+            </div>
+        {% endif %}
 
-            <div class="list-group mb-3">
+        <!-- SCROLL AREA -->
+        <div class="flex-grow-1 overflow-auto px-1 min-h-0">
 
-                {% for choice in question.choices.all %}
-                <label class="list-group-item option-hover d-flex align-items-center">
-                    
-                    <input class="form-check-input me-3"
-                        type="radio"
-                        name="choice"
-                        value="{{ choice.id }}"
-                        required>
-
-                    {{ choice.text }}
-
-                </label>
-                {% endfor %}
-
+            <!-- HEADER (FIJO) -->
+            <div class="text-center mb-3">
+                <span class="badge bg-danger mb-2">Día {{ question.day }}</span>
+                <h4 class="fw-bold fs-5">{{ question.text }}</h4>
             </div>
 
-        {% endif %}
+            {% if question.question_type == "MULTI" %}
 
-        <!-- ===================== -->
-        <!-- ORDER -->
-        <!-- ===================== -->
-        {% if question.question_type == "ORDER" %}
+                <div class="list-group mb-3">
 
-            <ul id="sortable-list" class="list-group mb-3">
+                    {% for choice in question.choices.all %}
+                    <label class="list-group-item option-hover d-flex align-items-center">
+                        
+                        <input class="form-check-input me-3"
+                            type="radio"
+                            name="choice"
+                            value="{{ choice.id }}"
+                            required>
 
-                {% for choice in question.choices.all %}
-                <li class="list-group-item d-flex justify-content-between align-items-center drag-handle"
-                    data-id="{{ choice.id }}">
+                        {{ choice.text }}
 
-                    <span>{{ choice.text }}</span>
+                    </label>
+                    {% endfor %}
 
-                </li>
-                {% endfor %}
+                </div>
 
-            </ul>
+            {% endif %}
 
-            <input type="hidden" name="order" id="orderInput">
+            {% if question.question_type == "ORDER" %}
 
-        {% endif %}
+                <ul id="sortable-list" class="list-group mb-3">
 
-        <!-- BUTTON -->
-        <button class="btn btn-primary w-100 py-2 fw-bold">
-            Enviar respuesta
-        </button>
+                    {% for choice in question.choices.all %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center drag-handle"
+                        data-id="{{ choice.id }}">
+
+                        <span>{{ choice.text }}</span>
+
+                    </li>
+                    {% endfor %}
+
+                </ul>
+
+                <input type="hidden" name="order" id="orderInput">
+
+            {% endif %}
+
+        </div>
+
+        <!-- BOTÓN FIJO ABAJO -->
+        <div class="pt-3 border-top">
+            <button class="btn btn-danger w-100 py-2 fw-bold">
+                Enviar respuesta
+            </button>
+        </div>
 
     </form>
 
     </div>
 
-    <script src="{% static 'calendar_app/js/order.js' %}"></script>
+    {% if question.question_type == "ORDER" %}
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="{% static 'calendar_app/js/order.js' %}"></script>
+    {% endif %}
 
 </div>
 {% endblock %}
