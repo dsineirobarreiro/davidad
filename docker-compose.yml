@@ -1,17 +1,30 @@
 version: "3.9"
 
 services:
-  web:
-    build: .
-    container_name: django_app
-    command: python manage.py runserver 0.0.0.0:8000
-    volumes:
-      - .:/app
-      - ./data:/app/data
-    ports:
-      - "8000:8000"
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    restart: always
     environment:
-      DB_PATH: /app/data/db.sqlite3
+      POSTGRES_DB: davidad_db
+      POSTGRES_USER: dsineiro
+      POSTGRES_PASSWORD: D@VId@D
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  web:
+    image: ghcr.io/dsineirobarreiro/davidad:latest
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "80:8000"
+    environment:
+      DB_NAME: davidad_db
+      DB_USER: dsineiro
+      DB_PASSWORD: D@VId@D
+      DB_HOST: db
+      DB_PORT: 5432
 
 volumes:
-  static_volume:
+  postgres_data:
