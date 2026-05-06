@@ -128,4 +128,4 @@ STATIC_URL = 'static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-ADVENT_START_DATE = date(2026, 4, 18)
+ADVENT_START_DATE = date(2026, 4, 11)
