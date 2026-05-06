@@ -32,7 +32,7 @@ def register(request):
 
 @login_required
 def home(request):
-    today = (timezone.now().date() - settings.ADVENT_START_DATE).days + 1
+    today = (timezone.localtime().date() - settings.ADVENT_START_DATE).days + 1
 
     questions = Question.objects.all().order_by('day')
     answered_days = set(
