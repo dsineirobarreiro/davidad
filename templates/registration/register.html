@@ -5,7 +5,7 @@
 
 <div class="container min-vh-100 d-flex justify-content-center align-items-center">
 
-<div class="card shadow p-4" style="max-width: 400px; max-width: 75vw; border-radius: 16px;">
+<div class="card shadow p-4" style="width: 75vw; border-radius: 16px;">
 
     <div class="text-center mb-4">
         <h3>🎄 Crear cuenta</h3>
@@ -39,7 +39,28 @@
             <input type="password" name="password_confirm" class="form-control" placeholder="Confirma tu contraseña" required>
         </div>
 
-        <button class="btn btn-primary w-100">
+        <!-- ACCEPT TERMS -->
+        <button
+            type="button"
+            id="termsButton"
+            class="btn btn-outline-secondary w-100 mb-3"
+            data-bs-toggle="modal"
+            data-bs-target="#termsModal">
+
+            Leer condiciones
+
+        </button>
+
+        <input
+            type="hidden"
+            name="accept_terms"
+            id="acceptTermsHidden"
+            value="false">
+
+        <button
+            id="signupButton"
+            class="btn btn-danger w-100"
+            disabled>
             Crear cuenta
         </button>
     </form>
@@ -54,5 +75,87 @@
 </div>
 
 </div>
+
+<!-- TERMS MODAL -->
+<div class="modal fade" id="termsModal" tabindex="-1">
+
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+
+        <div class="modal-content m-3">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    🎄 Condiciones de uso
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <!-- TU TEXTO -->
+                <p>
+                    Las pregunta ques leerás a continuación deben ser respondidas con la mayor seriedad posible y de manera individual; intentar reflexionar de manera individual para que no estén influenciadas. Se recomienda no abrir el cuestionario si no se tienen al menos un par de minutos para pensar detenidamente a la cuestión. Si no se cuenta con el tiempo necesario, es preferible dejarlo para otro momento. Podéis responder libremente, pero será más divertido si lo hacéis a conciencia.
+                </p>
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    Cerrar
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const modal = document.getElementById("termsModal");
+
+    const termsButton = document.getElementById("termsButton");
+
+    const signupButton = document.getElementById("signupButton");
+
+    const hiddenInput = document.getElementById("acceptTermsHidden");
+
+    let accepted = false;
+
+    modal.addEventListener("hidden.bs.modal", () => {
+
+        if (accepted) return;
+
+        accepted = true;
+
+        hiddenInput.value = "true";
+
+        signupButton.disabled = false;
+
+        // Cambiar estilo del botón
+        termsButton.classList.remove(
+            "btn-outline-secondary"
+        );
+
+        termsButton.classList.add(
+            "btn-success"
+        );
+
+        termsButton.innerHTML =
+            "✓ Condiciones leídas";
+
+    });
+
+});
+
+</script>
 
 {% endblock %}

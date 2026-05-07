@@ -13,6 +13,11 @@ class SignUpForm(forms.ModelForm):
         label="Confirmar contraseña"
     )
 
+    accept_terms = forms.BooleanField(
+        required=True,
+        label="He leído y acepto las condiciones"
+    )
+
     class Meta:
         model = User
         fields = ['username']
