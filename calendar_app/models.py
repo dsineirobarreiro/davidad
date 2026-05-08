@@ -56,3 +56,25 @@ class OrderAnswerItem(models.Model):
     class Meta:
         unique_together = ('order_answer', 'position')
         ordering = ['position']
+
+class UserMatch(models.Model):
+
+    user_a = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="matches_a"
+    )
+
+    user_b = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="matches_b"
+    )
+
+    score = models.FloatField()
+
+    max_score = models.FloatField(default=0)
+
+    percentage = models.FloatField(default=0)
+
+    updated_at = models.DateTimeField(auto_now=True)

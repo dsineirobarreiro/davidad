@@ -1,14 +1,19 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.db import models
+from django.http import JsonResponse
 from django.utils import timezone
 
 from .forms import SignUpForm
-from .models import Question, Answer
+from .models import Question, Answer, SingleChoiceAnswer, UserMatch
 from .utils import get_next_question_for_user
 from .services.answer_service import AnswerService
+from .services.match_service import recalculate_matches_for_user
 
 def register(request):
     if request.method == 'POST':
@@ -84,6 +89,10 @@ def answer_question(request, question_id):
                 question=question,
                 data=request.POST
             )
+
+            print(request.user)
+            recalculate_matches_for_user(request.user)
+
             return redirect('home')
 
         except ValidationError as e:
@@ -92,4 +101,88 @@ def answer_question(request, question_id):
     return render(request, 'answer.html', {
         'question': question,
         'error': error
+    })
+
+@staff_member_required
+def stats_page(request):
+
+    return render(request, "stats.html", {
+        "users": User.objects.all(),
+        "days": range(1, 25)
+    })
+
+@staff_member_required
+def question_stats_api(request, day):
+
+    question = Question.objects.get(day=day)
+
+    data = []
+
+    total_answers = Answer.objects.filter(
+        question=question
+    ).count()
+
+    # MULTI
+    if question.question_type == "MULTI":
+
+        for choice in question.choices.all():
+
+            count = SingleChoiceAnswer.objects.filter(
+                answer__question=question,
+                choice=choice
+            ).count()
+
+            data.append({
+                "label": choice.text,
+                "count": count,
+                "percentage": (
+                    round((count / total_answers) * 100, 1)
+                    if total_answers > 0 else 0
+                )
+            })
+
+    return JsonResponse({
+        "question": question.text,
+        "type": question.question_type,
+        "data": data
+    })
+
+@staff_member_required
+def user_matches_api(request, user_id):
+
+    user = User.objects.get(id=user_id)
+
+    matches = []
+
+    user_matches = UserMatch.objects.filter(
+        models.Q(user_a=user) |
+        models.Q(user_b=user)
+    )
+
+    for match in user_matches:
+
+        other_user = (
+            match.user_b
+            if match.user_a == user
+            else match.user_a
+        )
+
+        matches.append({
+
+            "username": other_user.username,
+
+            "score": match.score,
+
+            "max_score": match.max_score,
+
+            "percentage": match.percentage
+        })
+
+    matches.sort(
+        key=lambda x: x["percentage"],
+        reverse=True
+    )
+
+    return JsonResponse({
+        "matches": matches
     })
