@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.utils import timezone
 
 from calendar_app.models import *
@@ -8,10 +9,10 @@ ORDER_WEIGHTS = [3, 2, 1, 0]
 
 def get_current_max_score():
 
-    today_day = timezone.now().day
+    today = (timezone.localtime().date() - settings.ADVENT_START_DATE).days + 1
 
     questions = Question.objects.filter(
-        day__lte=today_day
+        day__lte=today
     )
 
     max_score = 0
@@ -40,10 +41,10 @@ def calculate_match(user_a, user_b):
         for a in Answer.objects.filter(user=user_b)
     }
 
-    today_day = timezone.now().day
+    today = (timezone.localtime().date() - settings.ADVENT_START_DATE).days + 1
 
     questions = Question.objects.filter(
-        day__lte=today_day
+        day__lte=today
     )
 
     for question in questions:

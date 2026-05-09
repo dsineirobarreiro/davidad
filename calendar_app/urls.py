@@ -15,6 +15,18 @@ urlpatterns = [
     ),
 
     path(
+        'api/user-question/<int:user_id>/<int:question_id>/',
+        views.user_question_api,
+        name='user_question_api'
+    ),
+
+    path(
+        "api/compatibility-timeline/<int:user1_id>/<int:user2_id>/",
+        views.compatibility_timeline_api,
+        name="compatibility_timeline_api"
+    ),
+
+    path(
         'api/user-matches/<int:user_id>/',
         views.user_matches_api,
         name='user_matches_api'
