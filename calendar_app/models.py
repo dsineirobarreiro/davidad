@@ -78,3 +78,28 @@ class UserMatch(models.Model):
     percentage = models.FloatField(default=0)
 
     updated_at = models.DateTimeField(auto_now=True)
+
+class EthicalProfile(models.Model):
+
+    name = models.CharField(max_length=50)
+
+    total_questions = models.PositiveIntegerField()
+
+    def __str__(self):
+        return self.name
+
+class ChoiceEthicalProfile(models.Model):
+
+    choice = models.ForeignKey(
+        Choice,
+        on_delete=models.CASCADE,
+        related_name="ethical_profiles"
+    )
+
+    profile = models.ForeignKey(
+        EthicalProfile,
+        on_delete=models.CASCADE
+    )
+
+    class Meta:
+        unique_together = ("choice", "profile")

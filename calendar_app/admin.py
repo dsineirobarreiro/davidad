@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Question, Choice, Answer, SingleChoiceAnswer, OrderAnswer, OrderAnswerItem, UserMatch
+from .models import Question, Choice, Answer, SingleChoiceAnswer, OrderAnswer, OrderAnswerItem, UserMatch, EthicalProfile, ChoiceEthicalProfile
 
 
 # =========================
@@ -157,3 +157,62 @@ class UserMatchAdmin(admin.ModelAdmin):
     ordering = (
         "-percentage",
     )
+
+# =====================
+# ETHICAL PROFILES
+# =====================
+
+@admin.register(Choice)
+class ChoiceAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "text",
+        "question"
+    )
+
+    search_fields = (
+        "text",
+    )
+
+    list_filter = (
+        "question__day",
+    )
+
+@admin.register(EthicalProfile)
+class EthicalProfileAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "name",
+        "total_questions"
+    )
+
+    search_fields = (
+        "name",
+    )
+
+
+@admin.register(ChoiceEthicalProfile)
+class ChoiceEthicalProfileAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "choice",
+        "question_day",
+        "profile"
+    )
+
+    list_filter = (
+        "profile",
+    )
+
+    search_fields = (
+        "choice__text",
+        "profile__name"
+    )
+
+    autocomplete_fields = (
+        "choice",
+        "profile"
+    )
+
+    def question_day(self, obj):
+        return obj.choice.question.day

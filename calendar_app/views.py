@@ -10,10 +10,11 @@ from django.http import JsonResponse
 from django.utils import timezone
 
 from .forms import SignUpForm
-from .models import Question, Answer, SingleChoiceAnswer, OrderAnswerItem, UserMatch
+from .models import Question, Answer, SingleChoiceAnswer, OrderAnswerItem, UserMatch, EthicalProfile, ChoiceEthicalProfile
 from .utils import get_next_question_for_user
 from .services.answer_service import AnswerService
 from .services.match_service import recalculate_matches_for_user
+from .services.ethical_profile_service import calculate_user_ethical_profile
 
 def register(request):
     if request.method == 'POST':
@@ -337,4 +338,21 @@ def user_matches_api(request, user_id):
 
     return JsonResponse({
         "matches": matches
+    })
+
+@staff_member_required
+def user_ethical_profile_api(request, user_id):
+
+    user = User.objects.get(id=user_id)
+
+    profiles = calculate_user_ethical_profile(
+        user
+    )
+
+    return JsonResponse({
+
+        "user": user.username,
+
+        "profiles": profiles
+
     })

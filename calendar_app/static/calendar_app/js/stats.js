@@ -1,5 +1,6 @@
 let chart = null;
 let compatibilityChart = null;
+let ethicalChart = null;
 
 async function loadQuestionStats(day) {
 
@@ -236,6 +237,127 @@ async function loadUserMatches(userId, range) {
     });
 }
 
+async function loadEthicalProfile(userId) {
+
+    const response = await fetch(
+        `/api/user-ethical-profile/${userId}/`
+    );
+
+    const data = await response.json();
+
+    const labels =
+        data.profiles.map(p => p.profile);
+
+    const scores =
+        data.profiles.map(p => p.score);
+
+    const ctx =
+        document.getElementById("ethicalChart");
+
+    if (ethicalChart) {
+        ethicalChart.destroy();
+    }
+
+    ethicalChart = new Chart(ctx, {
+
+        type: 'polarArea',
+
+        data: {
+
+            labels: labels,
+
+            datasets: [{
+
+                data: scores,
+
+                backgroundColor: [
+
+                    '#ff6385c7',
+                    '#36a2ebc7',
+                    '#ffce56c7',
+                    '#4bc0c0c7',
+                    '#9966ffc7',
+                    '#ff9f40c7'
+
+                ]
+
+            }]
+        },
+
+        options: {
+
+            responsive: true,
+            maintainAspectRatio: false,
+
+            scales: {
+
+                r: {
+
+                    min: 0,
+                    max: 100,
+
+                    ticks: {
+
+                        color: 'white',
+
+                        backdropColor: 'transparent'
+
+                    },
+
+                    grid: {
+                        color: 'rgba(255,255,255,0.15)'
+                    },
+
+                    angleLines: {
+                        color: 'rgba(255,255,255,0.15)'
+                    },
+
+                    pointLabels: {
+
+                        color: 'white',
+
+                        font: {
+                            size: 14
+                        }
+
+                    }
+
+                }
+
+            },
+
+            plugins: {
+
+                legend: {
+
+                    labels: {
+                        color: 'white'
+                    }
+
+                },
+
+                tooltip: {
+
+                    callbacks: {
+
+                        label: function(context) {
+
+                            return `${context.label}: ${context.raw}%`;
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    });
+
+}
+
 document.addEventListener("DOMContentLoaded", () => {
 
     const questionSelect =
@@ -259,8 +381,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const matchGraph2Select =
         document.getElementById("matchGraph2Select");
 
+    const ethicalUserSelect =
+        document.getElementById("ethicalUserSelect");
+
     loadQuestionStats(questionSelect.value);
     loadUserMatches(userSelect.value, rangeSelect.value);
+    loadEthicalProfile(ethicalUserSelect.value);
 
     questionSelect.addEventListener("change", () => {
 
@@ -294,5 +420,12 @@ document.addEventListener("DOMContentLoaded", () => {
     uqQuestion.addEventListener("change", refresh);
 
     refresh();
+
+    ethicalUserSelect.addEventListener("change", () => {
+
+        loadEthicalProfile(ethicalUserSelect.value);
+
+    }
+);
 
 });

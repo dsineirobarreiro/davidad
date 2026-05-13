@@ -31,4 +31,10 @@ urlpatterns = [
         views.user_matches_api,
         name='user_matches_api'
     ),
+
+    path(
+        "api/user-ethical-profile/<int:user_id>/",
+        views.user_ethical_profile_api,
+        name="user_ethical_profile_api"
+    ),
 ]
