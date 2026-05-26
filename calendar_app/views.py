@@ -114,7 +114,7 @@ def matches_page(request):
     user_matches = UserMatch.objects.filter(
         models.Q(user_a=user) |
         models.Q(user_b=user)
-    )
+    ).order_by("-percentage")
 
     matches_data = []
 
