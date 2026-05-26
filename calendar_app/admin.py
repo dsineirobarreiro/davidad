@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Question, Choice, Answer, SingleChoiceAnswer, OrderAnswer, OrderAnswerItem, UserMatch, EthicalProfile, ChoiceEthicalProfile
+from .models import Question, Choice, Answer, SingleChoiceAnswer, OrderAnswer, OrderAnswerItem, UserMatch, EthicalProfile, ChoiceEthicalProfile, UserMatchGuess
 
 
 # =========================
@@ -157,6 +157,54 @@ class UserMatchAdmin(admin.ModelAdmin):
     ordering = (
         "-percentage",
     )
+
+@admin.register(UserMatchGuess)
+class UserMatchGuessAdmin(admin.ModelAdmin):
+
+    list_display = (
+
+        "user",
+        "real_user",
+        "guessed_user",
+        "is_correct",
+        "updated_at"
+
+    )
+
+    list_filter = (
+
+        "is_correct",
+        "updated_at"
+
+    )
+
+    search_fields = (
+
+        "user__username",
+        "guessed_user__username"
+
+    )
+
+    autocomplete_fields = (
+
+        "user",
+        "user_match",
+        "guessed_user"
+
+    )
+
+    readonly_fields = (
+
+        "updated_at",
+
+    )
+
+    def real_user(self, obj):
+
+        if obj.user_match.user_a == obj.user:
+            return obj.user_match.user_b
+
+        return obj.user_match.user_a
 
 # =====================
 # ETHICAL PROFILES

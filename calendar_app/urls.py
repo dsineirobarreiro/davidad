@@ -5,6 +5,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('accounts/register/', views.register, name='register'),
     path('question/<int:question_id>/', views.answer_question, name='answer_question'),
+    path('matches/', views.matches_page, name='matches'),
 
     path('stats/', views.stats_page, name='stats'),
 
@@ -36,5 +37,17 @@ urlpatterns = [
         "api/user-ethical-profile/<int:user_id>/",
         views.user_ethical_profile_api,
         name="user_ethical_profile_api"
+    ),
+
+    path(
+        "api/check-match-guesses/",
+        views.check_match_guesses_api,
+        name="check_match_guesses_api"
+    ),
+
+    path(
+        "api/save-match-guess/",
+        views.save_match_guess_api,
+        name="save_match_guess_api"
     ),
 ]

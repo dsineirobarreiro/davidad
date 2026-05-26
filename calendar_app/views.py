@@ -1,3 +1,5 @@
+import json
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
@@ -10,7 +12,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 
 from .forms import SignUpForm
-from .models import Question, Answer, SingleChoiceAnswer, OrderAnswerItem, UserMatch, EthicalProfile, ChoiceEthicalProfile
+from .models import Question, Answer, SingleChoiceAnswer, OrderAnswerItem, UserMatch, EthicalProfile, ChoiceEthicalProfile, UserMatchGuess
 from .utils import get_next_question_for_user
 from .services.answer_service import AnswerService
 from .services.match_service import recalculate_matches_for_user
@@ -102,6 +104,149 @@ def answer_question(request, question_id):
     return render(request, 'answer.html', {
         'question': question,
         'error': error
+    })
+
+@login_required
+def matches_page(request):
+
+    user = request.user
+
+    user_matches = UserMatch.objects.filter(
+        models.Q(user_a=user) |
+        models.Q(user_b=user)
+    )
+
+    matches_data = []
+
+    for match in user_matches:
+
+        other_user = (
+            match.user_b
+            if match.user_a == request.user
+            else match.user_a
+        )
+
+        guess = UserMatchGuess.objects.filter(
+            user=request.user,
+            user_match=match
+        ).first()
+
+        matches_data.append({
+
+            "match_id": match.id,
+
+            "percentage": match.percentage,
+
+            "guess_user_id":
+                guess.guessed_user.id
+                if guess else None,
+
+            "guess_username":
+                guess.guessed_user.username
+                if guess else "???",
+
+            "is_correct":
+                guess.is_correct
+                if guess else None
+
+        })
+
+    users = User.objects.exclude(
+        id=user.id
+    )
+
+    return render(request, "matches.html", {
+
+        "matches": matches_data,
+        "users": users,
+
+    })
+
+@login_required
+def save_match_guess_api(request):
+
+    if request.method != "POST":
+        return JsonResponse({}, status=405)
+
+    data = json.loads(request.body)
+
+    match_id = data["match_id"]
+    guessed_user_id = data["guessed_user_id"]
+
+    match = UserMatch.objects.get(
+        id=match_id
+    )
+
+    guess, _ = UserMatchGuess.objects.update_or_create(
+
+        user=request.user,
+
+        user_match=match,
+
+        defaults={
+
+            "guessed_user_id":
+                guessed_user_id
+
+        }
+
+    )
+
+    return JsonResponse({
+        "success": True
+    })
+
+@login_required
+def check_match_guesses_api(request):
+
+    if request.method != "POST":
+        return JsonResponse({
+            "error": "Invalid method"
+        }, status=405)
+
+    data = json.loads(request.body)
+
+    guesses = data.get("guesses", [])
+
+    results = []
+
+    for guess in guesses:
+
+        match_id = guess["match_id"]
+        guessed_user_id = guess["guessed_user_id"]
+
+        match = UserMatch.objects.get(id=match_id)
+
+        real_user = (
+            match.user_b
+            if match.user_a == request.user
+            else match.user_a
+        )
+
+        is_correct = real_user.id == int(guessed_user_id) if guessed_user_id else False
+
+        guess = UserMatchGuess.objects.get(
+
+            user=request.user,
+            user_match=match
+
+        )
+
+        guess.is_correct = is_correct
+
+        guess.save()
+
+        results.append({
+
+            "match_id": match_id,
+
+            "correct":
+                is_correct
+
+        })
+
+    return JsonResponse({
+        "results": results
     })
 
 @staff_member_required

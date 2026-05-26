@@ -79,6 +79,40 @@ class UserMatch(models.Model):
 
     updated_at = models.DateTimeField(auto_now=True)
 
+class UserMatchGuess(models.Model):
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="match_guesses"
+    )
+
+    user_match = models.ForeignKey(
+        UserMatch,
+        on_delete=models.CASCADE
+    )
+
+    guessed_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="guessed_by"
+    )
+
+    is_correct = models.BooleanField(
+        default=False
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    class Meta:
+
+        unique_together = (
+            "user",
+            "user_match"
+        )
+
 class EthicalProfile(models.Model):
 
     name = models.CharField(max_length=50)

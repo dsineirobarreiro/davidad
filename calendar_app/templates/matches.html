@@ -1,0 +1,154 @@
+{% extends 'master.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container py-4 text-white">
+
+    <h1 class="mb-4 text-center">
+        🎯 Adivina tus matches
+    </h1>
+
+    <div
+        id="matchesList"
+        class="d-flex flex-column gap-3 pb-5">
+
+        {% for match in matches %}
+
+        <div
+            class="match-card card bg-dark text-white p-3
+                {% if match.is_correct == True %}
+                    border border-success
+                {% elif match.is_correct == False %}
+                    border border-danger
+                {% else %}
+                    border border-secondary
+                {% endif %}
+            "
+            data-match-id="{{ match.match_id }}">
+
+            <div class="d-flex justify-content-between align-items-center mb-2">
+
+                <button
+                    class="btn btn-outline-light guess-btn"
+                    data-match-id="{{ match.match_id }}"
+                    data-guessed-user-id="{{ match.guess_user_id }}">
+
+                    {{ match.guess_username }}
+
+                </button>
+
+                <strong>
+                    {{ match.percentage }}%
+                </strong>
+
+            </div>
+
+            <div class="progress">
+
+                <div
+                    class="progress-bar bg-success"
+                    role="progressbar"
+                    style="width: {{ match.percentage }}%">
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+<!-- BOTÓN FIJO -->
+
+<div class="sticky-bottom bg-dark p-3 border-top">
+
+    <button
+        id="checkMatchesBtn"
+        class="btn btn-danger w-100">
+
+        Comprobar matches
+
+    </button>
+
+</div>
+
+<!-- MODAL -->
+
+<div
+    class="modal fade"
+    id="guessModal"
+    tabindex="-1">
+
+    <div class="modal-dialog">
+
+        <div class="modal-content bg-dark text-white">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+                    ¿Quién crees que es?
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close btn-close-white"
+                    data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <div
+                    id="userGrid"
+                    class="row g-2">
+
+                    {% for user in users %}
+
+                    <div class="col-4">
+
+                        <button
+                            type="button"
+                            class="btn btn-outline-light w-100 user-choice-btn"
+                            data-user-id="{{ user.id }}"
+                            data-username="{{ user.username }}">
+
+                            {{ user.username }}
+
+                        </button>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                    Cancelar
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="{% static 'calendar_app/js/matches.js' %}"></script>
+
+{% endblock %}
