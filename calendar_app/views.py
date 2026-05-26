@@ -177,6 +177,17 @@ def save_match_guess_api(request):
         id=match_id
     )
 
+    if guessed_user_id is None:
+
+        UserMatchGuess.objects.filter(
+            user=request.user,
+            user_match=match
+        ).delete()
+
+        return JsonResponse({
+            "success": True
+        })
+
     guess, _ = UserMatchGuess.objects.update_or_create(
 
         user=request.user,

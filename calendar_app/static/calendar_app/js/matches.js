@@ -68,12 +68,28 @@ document
 
             sendUserMatchGuess(currentMatchId, null);
 
+            console.log("Guess removed for match", currentMatchId);
+
             const guessButton =
                 document.querySelector(
                     `.guess-btn[data-match-id="${currentMatchId}"]`
                 );
 
             guessButton.innerText = "???";
+
+            const guessMatch =
+                document.querySelector(
+                    `.match-card[data-match-id="${currentMatchId}"]`
+                );
+
+            guessMatch.classList.remove(
+                "border-success",
+                "border-danger"
+            );
+
+            guessMatch.classList.add(
+                "border-secondary"
+            );
 
             refreshDisabledUsers(currentMatchId);
 
