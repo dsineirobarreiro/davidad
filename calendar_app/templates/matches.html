@@ -32,7 +32,9 @@
                 <button
                     class="btn btn-outline-light guess-btn"
                     data-match-id="{{ match.match_id }}"
-                    data-guessed-user-id="{{ match.guess_user_id }}">
+                    {% if match.guess_user_id %}
+                        data-guessed-user-id="{{ match.guess_user_id }}"
+                    {% endif %}>
 
                     {{ match.guess_username }}
 
