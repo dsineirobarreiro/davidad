@@ -61,8 +61,7 @@ def calculate_user_ethical_profile(user):
         })
 
     result.sort(
-        key=lambda x: x["score"],
-        reverse=True
+        key=lambda x: x["profile"]
     )
 
     return result

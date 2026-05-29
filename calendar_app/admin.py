@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Question, Choice, Answer, SingleChoiceAnswer, OrderAnswer, OrderAnswerItem, UserMatch, EthicalProfile, ChoiceEthicalProfile, UserMatchGuess
+from .models import Question, Choice, Answer, SingleChoiceAnswer, OrderAnswer, OrderAnswerItem, UserMatch, EthicalProfile, ChoiceEthicalProfile, UserMatchGuess, Gift
 
 
 # =========================
@@ -166,15 +166,7 @@ class UserMatchGuessAdmin(admin.ModelAdmin):
         "user",
         "real_user",
         "guessed_user",
-        "is_correct",
-        "updated_at"
-
-    )
-
-    list_filter = (
-
-        "is_correct",
-        "updated_at"
+        "is_correct"
 
     )
 
@@ -193,18 +185,33 @@ class UserMatchGuessAdmin(admin.ModelAdmin):
 
     )
 
-    readonly_fields = (
-
-        "updated_at",
-
-    )
-
     def real_user(self, obj):
 
         if obj.user_match.user_a == obj.user:
             return obj.user_match.user_b
 
         return obj.user_match.user_a
+    
+# =====================
+# GIFTS
+# =====================
+
+@admin.register(Gift)
+class GiftAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "user",
+        "name"
+    )
+
+    search_fields = (
+        "user__username",
+        "name"
+    )
+
+    autocomplete_fields = (
+        "user",
+    )
 
 # =====================
 # ETHICAL PROFILES

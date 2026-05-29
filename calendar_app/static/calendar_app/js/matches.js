@@ -1,5 +1,9 @@
 let currentMatchId = null;
 
+let currentGiftButton = null;
+let currentGiftSlot = null;
+let currentTargetUser = null;
+
 const guesses = {};
 
 const modal = new bootstrap.Modal(
@@ -90,6 +94,38 @@ document
             guessMatch.classList.add(
                 "border-secondary"
             );
+
+            const row = document.querySelector(
+                `.match-card[data-match-id="${currentMatchId}"]`
+            );
+
+            row
+            .querySelectorAll(".gift-btn")
+            .forEach(btn => {
+
+                btn.disabled = true;
+
+                btn.innerText = "???";
+
+                btn.dataset.giftId = "";
+
+                btn.classList.remove(
+                    "border-success",
+                    "border-danger"
+                );
+
+                btn.classList.add(
+                    "border-secondary"
+                );
+
+                const checkBtn =
+                row.querySelector(
+                    ".check-gifts-btn"
+                );
+
+                checkBtn.disabled = true;
+
+            });
 
             refreshDisabledUsers(currentMatchId);
 
@@ -289,6 +325,50 @@ document
                 : "border-danger"
         );
 
+        const guessBtn =
+            card.querySelector(".guess-btn");
+
+        guessBtn.disabled = result.finished;
+
+        if (!result.correct && result.finished) {
+
+            guessBtn.innerText =
+                result.real_username;
+
+            delete guesses[result.match_id];
+
+        }
+
+        const giftsContainer =
+            card.querySelector(
+                ".revealed-gifts"
+            );
+
+        giftsContainer.innerHTML = `
+
+            <div class="row g-2">
+
+                ${result.gift_slots.map(g => `
+
+                    <div class="col-4">
+
+                        <div
+                            class="card bg-secondary text-white p-3 text-center"
+                            style="
+                                transition: all 0.25s ease;
+                            ">
+
+                                ${g.name}
+
+                        </div>
+
+                    </div>
+
+                `).join("")}
+
+            </div>
+
+        `;
     });
 
 });

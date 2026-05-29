@@ -83,8 +83,7 @@ class UserMatchGuess(models.Model):
 
     user = models.ForeignKey(
         User,
-        on_delete=models.CASCADE,
-        related_name="match_guesses"
+        on_delete=models.CASCADE
     )
 
     user_match = models.ForeignKey(
@@ -94,24 +93,51 @@ class UserMatchGuess(models.Model):
 
     guessed_user = models.ForeignKey(
         User,
-        on_delete=models.CASCADE,
-        related_name="guessed_by"
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="received_match_guesses"
+    )
+
+    attempts = models.PositiveIntegerField(
+        default=0
     )
 
     is_correct = models.BooleanField(
+        null=True,
+        blank=True
+    )
+
+    is_finished = models.BooleanField(
         default=False
     )
 
-    updated_at = models.DateTimeField(
-        auto_now=True
-    )
-
     class Meta:
-
         unique_together = (
             "user",
             "user_match"
         )
+
+class Gift(models.Model):
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="gifts"
+    )
+
+    name = models.CharField(
+        max_length=255
+    )
+
+    difficulty = models.PositiveIntegerField(default=1)
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return f"{self.user.username} - {self.name}"
 
 class EthicalProfile(models.Model):
 

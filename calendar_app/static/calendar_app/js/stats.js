@@ -298,9 +298,23 @@ async function loadEthicalProfile(userId) {
 
                     ticks: {
 
+                        stepSize: 10,
+
                         color: 'white',
 
-                        backdropColor: 'transparent'
+                        backdropColor: 'transparent',
+
+                        font: {
+                            size: 20
+                        },
+
+                        callback: function(value) {
+
+                            return value % 20 === 0
+                                ? value
+                                : "";
+
+                        }
 
                     },
 
@@ -331,7 +345,11 @@ async function loadEthicalProfile(userId) {
                 legend: {
 
                     labels: {
-                        color: 'white'
+                        color: 'white',
+
+                        font: {
+                            size: 24
+                        }
                     }
 
                 },
@@ -357,6 +375,28 @@ async function loadEthicalProfile(userId) {
     });
 
 }
+
+document
+.getElementById("downloadEthicsChart")
+.addEventListener("click", () => {
+
+    const canvas =
+        document.getElementById(
+            "ethicalChart"
+        );
+
+    const link =
+        document.createElement("a");
+
+    link.download =
+        "perfil-etico.png";
+
+    link.href =
+        canvas.toDataURL("image/png");
+
+    link.click();
+
+});
 
 document.addEventListener("DOMContentLoaded", () => {
 

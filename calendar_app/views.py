@@ -12,7 +12,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 
 from .forms import SignUpForm
-from .models import Question, Answer, SingleChoiceAnswer, OrderAnswerItem, UserMatch, EthicalProfile, ChoiceEthicalProfile, UserMatchGuess
+from .models import Question, Answer, SingleChoiceAnswer, OrderAnswerItem, UserMatch, EthicalProfile, ChoiceEthicalProfile, UserMatchGuess, Gift
 from .utils import get_next_question_for_user
 from .services.answer_service import AnswerService
 from .services.match_service import recalculate_matches_for_user
@@ -122,14 +122,62 @@ def matches_page(request):
 
         other_user = (
             match.user_b
-            if match.user_a == request.user
+            if match.user_a == user
             else match.user_a
         )
 
-        guess = UserMatchGuess.objects.filter(
-            user=request.user,
+        guess, _ = UserMatchGuess.objects.get_or_create(
+
+            user=user,
             user_match=match
-        ).first()
+
+        )
+
+        all_gifts = list(
+
+            Gift.objects.filter(
+                user=other_user
+            ).order_by("difficulty")
+
+        )
+
+        gift_slots = []
+
+        for i in range(3):
+
+            revealed = (
+
+                guess.is_correct
+
+                or
+
+                i < guess.attempts
+
+            )
+
+            if i < len(all_gifts):
+
+                gift = all_gifts[i]
+
+                gift_slots.append({
+
+                    "revealed": revealed,
+
+                    "name":
+                        gift.name
+                        if revealed
+                        else "🔒"
+
+                })
+
+            else:
+
+                gift_slots.append({
+
+                    "revealed": False,
+                    "name": "🔒"
+
+                })
 
         matches_data.append({
 
@@ -139,15 +187,29 @@ def matches_page(request):
 
             "guess_user_id":
                 guess.guessed_user.id
-                if guess else None,
+                if guess.guessed_user else None,
 
             "guess_username":
-                guess.guessed_user.username
-                if guess else "???",
 
-            "is_correct":
-                guess.is_correct
-                if guess else None
+                other_user.username
+
+                if guess.is_finished
+
+                else (
+
+                    guess.guessed_user.username
+                    if guess.guessed_user
+                    else "???"
+
+                ),
+
+            "is_correct": guess.is_correct,
+
+            "is_finished": guess.is_finished,
+
+            "attempts": guess.attempts,
+
+            "gift_slots": gift_slots,
 
         })
 
@@ -158,7 +220,7 @@ def matches_page(request):
     return render(request, "matches.html", {
 
         "matches": matches_data,
-        "users": users,
+        "users": users
 
     })
 
@@ -177,31 +239,21 @@ def save_match_guess_api(request):
         id=match_id
     )
 
-    if guessed_user_id is None:
-
-        UserMatchGuess.objects.filter(
-            user=request.user,
-            user_match=match
-        ).delete()
-
-        return JsonResponse({
-            "success": True
-        })
-
-    guess, _ = UserMatchGuess.objects.update_or_create(
+    guess, _ = UserMatchGuess.objects.get_or_create(
 
         user=request.user,
-
-        user_match=match,
-
-        defaults={
-
-            "guessed_user_id":
-                guessed_user_id
-
-        }
+        user_match=match
 
     )
+
+    if guess.is_finished:
+
+        return JsonResponse({
+            "error": "Finished"
+        }, status=400)
+
+    guess.guessed_user_id = guessed_user_id
+    guess.save()
 
     return JsonResponse({
         "success": True
@@ -211,9 +263,7 @@ def save_match_guess_api(request):
 def check_match_guesses_api(request):
 
     if request.method != "POST":
-        return JsonResponse({
-            "error": "Invalid method"
-        }, status=405)
+        return JsonResponse({}, status=405)
 
     data = json.loads(request.body)
 
@@ -221,38 +271,122 @@ def check_match_guesses_api(request):
 
     results = []
 
-    for guess in guesses:
+    for g in guesses:
 
-        match_id = guess["match_id"]
-        guessed_user_id = guess["guessed_user_id"]
+        match_id = g["match_id"]
+        guessed_user_id = g["guessed_user_id"]
 
-        match = UserMatch.objects.get(id=match_id)
+        match = UserMatch.objects.get(
+            id=match_id
+        )
 
         real_user = (
+
             match.user_b
             if match.user_a == request.user
             else match.user_a
+
         )
 
-        is_correct = real_user.id == int(guessed_user_id) if guessed_user_id else False
-
-        guess = UserMatchGuess.objects.get(
+        guess, _ = UserMatchGuess.objects.get_or_create(
 
             user=request.user,
             user_match=match
 
         )
 
-        guess.is_correct = is_correct
+        if guess.is_finished:
+            continue
+
+        is_correct = (
+            guessed_user_id
+            and int(guessed_user_id) == real_user.id
+        )
+
+        # =====================
+        # CORRECT
+        # =====================
+
+        if is_correct:
+
+            guess.is_correct = True
+            guess.is_finished = True
+
+        # =====================
+        # FAIL
+        # =====================
+
+        else:
+
+            guess.attempts += 1
+            guess.is_correct = False
+
+            if guess.attempts >= 4:
+
+                guess.is_finished = True
 
         guess.save()
 
+        all_gifts = list(
+
+            Gift.objects.filter(
+                user=real_user
+            ).order_by("difficulty")
+
+        )
+
+        gift_slots = []
+
+        for i in range(3):
+
+            revealed = (
+
+                guess.is_correct
+
+                or
+
+                i < guess.attempts
+
+            )
+
+            if i < len(all_gifts):
+
+                gift = all_gifts[i]
+
+                gift_slots.append({
+
+                    "revealed": revealed,
+
+                    "name":
+                        gift.name
+                        if revealed
+                        else "🔒"
+
+                })
+
+            else:
+
+                gift_slots.append({
+
+                    "revealed": False,
+                    "name": "🔒"
+
+                })
+
         results.append({
 
-            "match_id": match_id,
+            "match_id": match.id,
 
-            "correct":
-                is_correct
+            "correct": guess.is_correct,
+
+            "finished": guess.is_finished,
+
+            "attempts": guess.attempts,
+
+            "real_username":
+                real_user.username,
+
+            "gift_slots": gift_slots
 
         })
 
