@@ -376,28 +376,6 @@ async function loadEthicalProfile(userId) {
 
 }
 
-document
-.getElementById("downloadEthicsChart")
-.addEventListener("click", () => {
-
-    const canvas =
-        document.getElementById(
-            "ethicalChart"
-        );
-
-    const link =
-        document.createElement("a");
-
-    link.download =
-        "perfil-etico.png";
-
-    link.href =
-        canvas.toDataURL("image/png");
-
-    link.click();
-
-});
-
 document.addEventListener("DOMContentLoaded", () => {
 
     const questionSelect =
@@ -465,7 +443,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
         loadEthicalProfile(ethicalUserSelect.value);
 
-    }
-);
+    });
+
+    document
+        .getElementById("downloadEthicsChart")
+        .addEventListener("click", () => {
+
+            const canvas =
+                document.getElementById(
+                    "ethicalChart"
+                );
+
+            const link =
+                document.createElement("a");
+
+            link.download =
+                "perfil-etico.png";
+
+            link.href =
+                canvas.toDataURL("image/png");
+
+            link.click();
+
+        });
 
 });
