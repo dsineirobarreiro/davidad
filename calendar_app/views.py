@@ -40,6 +40,7 @@ def register(request):
 
 @login_required
 def home(request):
+    print("Printeame ahi un log version=2.0")
     today = (timezone.localtime().date() - settings.ADVENT_START_DATE).days + 1
 
     questions = Question.objects.all().order_by('day')
